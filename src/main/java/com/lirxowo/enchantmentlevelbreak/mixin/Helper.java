@@ -3,9 +3,9 @@ package com.lirxowo.enchantmentlevelbreak.mixin;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import com.lirxowo.enchantmentlevelbreak.config.Config;
@@ -14,8 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Map;
 
@@ -32,16 +30,23 @@ public class Helper {
                 int level = entry.getValue();
                 CompoundNBT compoundnbt = new CompoundNBT();
                 compoundnbt.putString("id", String.valueOf(Registry.ENCHANTMENT.getKey(enchantment)));
-                // 使用putInt塞爆ojang的老🐎
                 compoundnbt.putInt("lvl", level);
                 listnbt.add(compoundnbt);
             }
         }
 
-        if (listnbt.isEmpty()) {
-            stack.removeTagKey("Enchantments");
+        if (stack.getItem() == Items.ENCHANTED_BOOK) {
+            if (listnbt.isEmpty()) {
+                stack.removeTagKey("StoredEnchantments");
+            } else {
+                stack.addTagElement("StoredEnchantments", listnbt);
+            }
         } else {
-            stack.addTagElement("Enchantments", listnbt);
+            if (listnbt.isEmpty()) {
+                stack.removeTagKey("Enchantments");
+            } else {
+                stack.addTagElement("Enchantments", listnbt);
+            }
         }
 
         ci.cancel();

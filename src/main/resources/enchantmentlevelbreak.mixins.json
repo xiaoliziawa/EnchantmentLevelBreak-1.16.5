@@ -5,6 +5,10 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "enchantmentlevelbreak.refmap.json",
   "mixins": [
+    "Helper",
+    "EnchantmentMixin",
+    "ItemStackMixin",
+    "AnvilMenuMixin"
   ],
   "client": [
   ],

@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "enchantmentlevelbreak.refmap.json",
   "mixins": [
+    "AbstractRepairContainerAccessor",
     "Helper",
     "EnchantmentMixin",
     "ItemStackMixin",

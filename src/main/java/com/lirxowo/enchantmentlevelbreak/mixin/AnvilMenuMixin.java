@@ -52,32 +52,33 @@ public abstract class AnvilMenuMixin {
             return;
         }
 
-        applyMerge(accessor, left, EnchantmentHelper.getEnchantments(left), rightEnchants, sameItem);
-    }
+        ItemStack result = accessor.enchantmentLevelBreak$getResultSlots().getItem(0);
+        if (result.isEmpty()) {
+            result = left.copy();
+        }
 
-    @Unique
-    private void applyMerge(AbstractRepairContainerAccessor accessor, ItemStack target, Map<Enchantment, Integer> leftEnchants, Map<Enchantment, Integer> rightEnchants, boolean isSameItemMerge) {
-        Map<Enchantment, Integer> resultEnchants = new LinkedHashMap<>(leftEnchants);
+        Map<Enchantment, Integer> leftEnchants = EnchantmentHelper.getEnchantments(left);
+        Map<Enchantment, Integer> merged = new LinkedHashMap<>(leftEnchants);
         boolean anyApplied = false;
         long totalCost = 0L;
 
         for (Map.Entry<Enchantment, Integer> entry : rightEnchants.entrySet()) {
             Enchantment enchantment = entry.getKey();
-            boolean canApply = isSameItemMerge || Config.allowAnyEnchantment || enchantment.canEnchant(target);
-            if (canApply) {
-                int newLevel = calculateNewLevel(resultEnchants.getOrDefault(enchantment, 0), entry.getValue());
-                resultEnchants.put(enchantment, newLevel);
-                totalCost += newLevel;
-                anyApplied = true;
+            boolean canApply = sameItem || Config.allowAnyEnchantment || enchantment.canEnchant(left);
+            if (!canApply) {
+                continue;
             }
+            int newLevel = calculateNewLevel(leftEnchants.getOrDefault(enchantment, 0), entry.getValue());
+            merged.put(enchantment, newLevel);
+            totalCost += newLevel;
+            anyApplied = true;
         }
 
         if (!anyApplied) {
             return;
         }
 
-        ItemStack result = target.copy();
-        EnchantmentHelper.setEnchantments(resultEnchants, result);
+        EnchantmentHelper.setEnchantments(merged, result);
         accessor.enchantmentLevelBreak$getResultSlots().setItem(0, result);
         this.cost.set((int) Math.max(1L, Math.min(totalCost, MAX_ANVIL_COST)));
         ((RepairContainer) (Object) this).broadcastChanges();
